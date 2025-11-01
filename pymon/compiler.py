@@ -8,6 +8,7 @@ from rich.console import Console
 from rich.table import Table
 
 from .transpiler import transpile_python_contract
+from .transpiler_enhanced import transpile_python_contract_enhanced
 
 # Optional Solidity support (not required for PyMon's Python-native contracts)
 try:
@@ -80,9 +81,13 @@ def compile_contracts(
                 console.print(f"[yellow]      (Must import from pymon.py_contracts)[/yellow]")
                 continue
             
-            # Transpile Python to EVM bytecode
-            console.print(f"[blue]  🔄 Transpiling to EVM bytecode...[/blue]")
-            transpile_result = transpile_python_contract(py_source)
+            # Transpile Python to EVM bytecode (using enhanced transpiler with proper ABI encoding)
+            console.print(f"[blue]  🔄 Transpiling to EVM bytecode (Enhanced)...[/blue]")
+            try:
+                transpile_result = transpile_python_contract_enhanced(py_source)
+            except Exception as e:
+                console.print(f"[yellow]  ⚠️  Enhanced transpiler error, falling back to original: {str(e)}[/yellow]")
+                transpile_result = transpile_python_contract(py_source)
             
             # Create output directory for this contract
             contract_output_dir = output_dir / contract_name
